@@ -1,0 +1,1 @@
+This file contains the code to configure the ESP32 microcontroller
