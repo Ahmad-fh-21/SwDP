@@ -21,12 +21,11 @@ def on_log(client, userdata, level, buf):
 
 
 ble_client.on_log = on_log
-ble_client.tls_set('/ble_certs/ca.crt', '/ble_certs/ca.crt', 
-                   '/ble_certs/ble.key')
+ble_client.tls_set('/ble_certs/ca.crt', '/ble_certs/ca.crt', '/ble_certs/ble.key')
 ble_client.connect('iotgw.local', 8883, 60)
 ble_client.loop_start()
 
-# Setup DBus informaton for adapter and remote device
+# Setup DBus information for adapter and remote device
 bus = pydbus.SystemBus()
 mngr = bus.get('org.bluez', '/')
 adapter = bus.get('org.bluez', adapter_path)
@@ -38,8 +37,7 @@ device.Connect()
 def get_characteristic_path(dev_path, uuid):
     mng_objs = mngr.GetManagedObjects()
     for path in mng_objs:
-        chr_uuid = mng_objs[path].get('org.bluez.GattCharacteristic1',
-                                       {}).get('UUID')
+        chr_uuid = mng_objs[path].get('org.bluez.GattCharacteristic1', {}).get('UUID')
         if path.startswith(dev_path) and chr_uuid == uuid:
             return path
 
@@ -49,8 +47,8 @@ while True:
     temperature = bus.get(bluez_service, char_path)
     char_path = get_characteristic_path(device._path, humidity_uuid)
     humidity = bus.get(bluez_service, char_path)
-    if callable(getattr(temperature, "ReadValue", 
-                        None)) and callable(getattr(humidity, "ReadValue", None)):
+    if (callable(getattr(temperature, "ReadValue", None)) and
+            callable(getattr(humidity, "ReadValue", None))):
         break
     print('Retry...')
 
@@ -79,7 +77,6 @@ temperature.onPropertiesChanged = temperature_change_handler
 temperature.StartNotify()
 humidity.onPropertiesChanged = humidity_change_handler
 humidity.StartNotify()
-
 
 try:
     mainloop.run()
