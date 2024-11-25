@@ -17,11 +17,12 @@ ble_client = mqtt.Client()
 
 
 def on_log(client, userdata, level, buf):
-  print("log: ", buf)
+    print("log: ", buf)
 
 
-ble_client.on_log=on_log
-ble_client.tls_set('/ble_certs/ca.crt', '/ble_certs/ca.crt', '/ble_certs/ble.key')
+ble_client.on_log = on_log
+ble_client.tls_set('/ble_certs/ca.crt', '/ble_certs/ca.crt', 
+                   '/ble_certs/ble.key')
 ble_client.connect('iotgw.local', 8883, 60)
 ble_client.loop_start()
 
@@ -33,10 +34,12 @@ device = bus.get('org.bluez', device_path)
 # Connect to device (needs to have already been paired via bluetoothctl)
 device.Connect()
 
+
 def get_characteristic_path(dev_path, uuid):
     mng_objs = mngr.GetManagedObjects()
     for path in mng_objs:
-        chr_uuid = mng_objs[path].get('org.bluez.GattCharacteristic1', {}).get('UUID')
+        chr_uuid = mng_objs[path].get('org.bluez.GattCharacteristic1',
+                                       {}).get('UUID')
         if path.startswith(dev_path) and chr_uuid == uuid:
             return path
 
@@ -46,12 +49,14 @@ while True:
     temperature = bus.get(bluez_service, char_path)
     char_path = get_characteristic_path(device._path, humidity_uuid)
     humidity = bus.get(bluez_service, char_path)
-    if callable(getattr(temperature, "ReadValue", None)) and callable(getattr(humidity, "ReadValue", None)):
+    if callable(getattr(temperature, "ReadValue", 
+                        None)) and callable(getattr(humidity, "ReadValue", None)):
         break
     print('Retry...')
 
 print(f"Temperature: {temperature.ReadValue({})}")
 print(f"Humidity: {humidity.ReadValue({})}")
+
 
 def temperature_change_handler(iface, prop_changed, prop_removed):
     if 'Value' in prop_changed:
@@ -83,4 +88,3 @@ except KeyboardInterrupt:
     temperature.StopNotify()
     humidity.StopNotify()
     device.Disconnect()
-
