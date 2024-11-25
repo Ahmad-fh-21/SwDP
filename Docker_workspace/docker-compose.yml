@@ -1,0 +1,38 @@
+
+version: '3'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    restart: unless-stopped
+    environment:
+        - TZ=Europe/Vienna
+    ports:
+        - "8883:8883"
+    volumes:
+        - mosquitto-data-storage:/mosquitto/data
+        - mosquitto-log-storage:/mosquitto/log
+        - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+        - ./mosquitto/ca.crt:/mosquitto/config/ca.crt
+        - ./mosquitto/server.key:/mosquitto/config/server.key
+        - ./mosquitto/server.crt:/mosquitto/config/server.crt
+        - ./mosquitto/passwd:/mosquitto/config/passwd
+  ble:
+    build: ble
+    depends_on:
+        - mosquitto
+    volumes:
+        - ./ble/certs:/ble_certs
+        - ./ble/ble.py:/ble.py
+        - /run/dbus:/run/dbus
+        - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+  client:
+    build: client
+    volumes:
+       - ./client/certs:/client_certs
+       - ./client/test.py:/test.py
+       - /run/dbus:/run/dbus
+       - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+volumes:
+  mosquitto-data-storage:
+  mosquitto-log-storage:
