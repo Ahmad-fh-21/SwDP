@@ -15,8 +15,10 @@ humidity_uuid = '9b5c4bed-5ffb-4c38-af8f-c52f01bd7c63'
 # Setup MQTT connection
 ble_client = mqtt.Client()
 
+
 def on_log(client, userdata, level, buf):
-  print("log: ",buf)
+  print("log: ", buf)
+
 
 ble_client.on_log=on_log
 ble_client.tls_set('/ble_certs/ca.crt', '/ble_certs/ca.crt', '/ble_certs/ble.key')
@@ -38,6 +40,7 @@ def get_characteristic_path(dev_path, uuid):
         if path.startswith(dev_path) and chr_uuid == uuid:
             return path
 
+
 while True:
     char_path = get_characteristic_path(device._path, temperature_uuid)
     temperature = bus.get(bluez_service, char_path)
@@ -57,6 +60,7 @@ def temperature_change_handler(iface, prop_changed, prop_removed):
         print(f"Time: {t} Temperature: {temp}C")
         ble_client.publish("/Temperature", f"Time: {t} Temperature: {temp}C")
 
+
 def humidity_change_handler(iface, prop_changed, prop_removed):
     if 'Value' in prop_changed:
         humidity = prop_changed['Value'][1]
@@ -64,11 +68,13 @@ def humidity_change_handler(iface, prop_changed, prop_removed):
         print(f"Time: {t} Humidity: {humidity}%")
         ble_client.publish("/Humidity", f"Time: {t} Humidity: {humidity}%")
 
+
 mainloop = GLib.MainLoop()
 temperature.onPropertiesChanged = temperature_change_handler
 temperature.StartNotify()
 humidity.onPropertiesChanged = humidity_change_handler
 humidity.StartNotify()
+
 
 try:
     mainloop.run()

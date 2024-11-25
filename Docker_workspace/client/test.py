@@ -5,10 +5,11 @@ import time
 
 client = mqtt.Client()
 
-def on_log(client, userdata, level, buf):
-  print("log: ",buf)
 
-client.on_log=on_log
+def on_log(client, userdata, level, buf):
+  print("log: ", buf)
+
+client.on_log = on_log
 
 client.tls_set('/client_certs/ca.crt','/client_certs/client.crt', '/client_certs/client.key')
 
