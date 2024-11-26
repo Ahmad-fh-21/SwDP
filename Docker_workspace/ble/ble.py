@@ -22,7 +22,8 @@ def on_log(client, userdata, level, buf):
 
 
 client.on_log = on_log
-client.tls_set('/client_certs/ca.crt', '/client_certs/ble.crt', '/client_certs/ble.key')
+client.tls_set('/client_certs/ca.crt', '/client_certs/ble.crt', \
+               '/client_certs/ble.key')
 client.connect('iotgw.local', 8883, 60)
 client.loop_start()
 print('MQTT server connected')
@@ -40,27 +41,29 @@ print('BLE device connected')
 def get_characteristic_path(dev_path, uuid):
     mng_objs = mngr.GetManagedObjects()
     for path in mng_objs:
-        chr_uuid = mng_objs[path].get('org.bluez.GattCharacteristic1', {}).get('UUID')
+        chr_uuid = mng_objs[path].get('org.bluez.GattCharacteristic1', \
+                                       {}).get('UUID')
         if path.startswith(dev_path) and chr_uuid == uuid:
             return path
-        
-#Read information from characteristic
+
+
+# Read information from characteristic
 char_path = None
-print ('Searching for temperature characteristic ', end='')
+print('Searching for temperature characteristic ', end='')
 while True:
     char_path = get_characteristic_path(device._path, temperature_uuid)
     if char_path is not None:
         break
-    print ('.', end='')
+    print('.', end='')
     time.sleep(1)
 print()
 temperature = bus.get(bluez_service, char_path)
-print ('Searching for humidity characteristic ', end='')
+print('Searching for humidity characteristic ', end='')
 while True:
     char_path = get_characteristic_path(device._path, humidity_uuid)
     if char_path is not None:
         break
-    print ('.', end='')
+    print('.', end = '')
     time.sleep(1)
 print()
 humidity = bus.get(bluez_service, char_path)
@@ -81,6 +84,7 @@ def humidity_change_handler(iface, prop_changed, prop_removed):
         humidity = prop_changed['Value'][1]
         print(f"Humidity: {humidity}%")
         client.publish("/sensors/1/humidity", humidity)
+
 
 mainloop = GLib.MainLoop()
 temperature.onPropertiesChanged = temperature_change_handler
