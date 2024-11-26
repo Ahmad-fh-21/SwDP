@@ -1,38 +1,104 @@
-
 version: '3'
-
 services:
+  ble:
+    build: ble
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Vienna
+    volumes:
+      - /run/dbus:/run/dbus
+      - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+      - ./ble/certs:/client_certs
   mosquitto:
     image: eclipse-mosquitto
     restart: unless-stopped
     environment:
-        - TZ=Europe/Vienna
+      - TZ=Europe/Vienna
     ports:
-        - "8883:8883"
+      - "8883:8883"
     volumes:
-        - mosquitto-data-storage:/mosquitto/data
-        - mosquitto-log-storage:/mosquitto/log
-        - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
-        - ./mosquitto/ca.crt:/mosquitto/config/ca.crt
-        - ./mosquitto/server.key:/mosquitto/config/server.key
-        - ./mosquitto/server.crt:/mosquitto/config/server.crt
-        - ./mosquitto/passwd:/mosquitto/config/passwd
-  ble:
-    build: ble
-    depends_on:
-        - mosquitto
-    volumes:
-        - ./ble/certs:/ble_certs
-        - ./ble/ble.py:/ble.py
-        - /run/dbus:/run/dbus
-        - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+      - mosquitto-data-storage:/mosquitto/data
+      - mosquitto-log-storage:/mosquitto/log
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/ca.crt:/mosquitto/config/ca.crt
+      - ./mosquitto/server.key:/mosquitto/config/server.key
+      - ./mosquitto/server.crt:/mosquitto/config/server.crt
+      - ./mosquitto/passwd:/mosquitto/config/passwd
   client:
     build: client
+    depends_on:
+      - mosquitto
     volumes:
-       - ./client/certs:/client_certs
-       - ./client/test.py:/test.py
-       - /run/dbus:/run/dbus
-       - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+      - ./client/certs:/client_certs
+      - /run/dbus:/run/dbus
+      - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+  influxdb:
+    image: influxdb:latest
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:8086:8086'
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+      - influxdb2lib-storage:/var/lib/influxdb2
+      - influxdb2etc-storage:/etc/influxdb2
+    environment:
+      - TZ=Europe/Vienna
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=org0
+      - DOCKER_INFLUXDB_INIT_BUCKET=bucket0
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:8086"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  nodered:
+    build:
+      context: ./nodered/.
+      args:
+        - DOCKERHUB_TAG=latest-debian
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Vienna
+    ports:
+      - "127.0.0.1:1880:1880"
+    volumes:
+      - nodered-storage:/data
+      - /run/dbus:/run/dbus
+      - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:3000:3000'
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana-provisioning/:/etc/grafana/provisioning
+      - ./grafana-dashboards/:/etc/grafana/dashboards
+    depends_on:
+      - influxdb
+    environment:
+      - TZ=Europe/Vienna
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/admin_password
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null","http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    secrets:
+      - admin_password
 volumes:
   mosquitto-data-storage:
   mosquitto-log-storage:
+  influxdb-storage:
+  influxdb2lib-storage:
+  influxdb2etc-storage:
+  nodered-storage:
+  grafana-storage:
+secrets:
+  admin_password:
+    file: ./secrets/grafana_admin_password
