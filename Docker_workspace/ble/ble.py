@@ -22,7 +22,7 @@ def on_log(client, userdata, level, buf):
 
 
 client.on_log = on_log
-client.tls_set('/client_certs/ca.crt', '/client_certs/ble.crt', \
+client.tls_set('/client_certs/ca.crt', '/client_certs/ble.crt', 
                '/client_certs/ble.key')
 client.connect('iotgw.local', 8883, 60)
 client.loop_start()
@@ -41,7 +41,7 @@ print('BLE device connected')
 def get_characteristic_path(dev_path, uuid):
     mng_objs = mngr.GetManagedObjects()
     for path in mng_objs:
-        chr_uuid = mng_objs[path].get('org.bluez.GattCharacteristic1', \
+        chr_uuid = mng_objs[path].get('org.bluez.GattCharacteristic1', 
                                        {}).get('UUID')
         if path.startswith(dev_path) and chr_uuid == uuid:
             return path
@@ -63,7 +63,7 @@ while True:
     char_path = get_characteristic_path(device._path, humidity_uuid)
     if char_path is not None:
         break
-    print('.', end = '')
+    print('.', end='')
     time.sleep(1)
 print()
 humidity = bus.get(bluez_service, char_path)
