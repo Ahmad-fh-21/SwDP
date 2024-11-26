@@ -22,8 +22,9 @@ def on_log(client, userdata, level, buf):
 
 
 client.on_log = on_log
-client.tls_set('/client_certs/ca.crt', '/client_certs/ble.crt', 
-               '/client_certs/ble.key')
+client.tls_set(
+    '/client_certs/ca.crt', '/client_certs/ble.crt', '/client_certs/ble.key'
+    )
 client.connect('iotgw.local', 8883, 60)
 client.loop_start()
 print('MQTT server connected')
@@ -41,8 +42,9 @@ print('BLE device connected')
 def get_characteristic_path(dev_path, uuid):
     mng_objs = mngr.GetManagedObjects()
     for path in mng_objs:
-        chr_uuid = mng_objs[path].get('org.bluez.GattCharacteristic1', 
-                                       {}).get('UUID')
+        chr_uuid = mng_objs[path].get(
+            'org.bluez.GattCharacteristic1', {}
+            ).get('UUID')
         if path.startswith(dev_path) and chr_uuid == uuid:
             return path
 
