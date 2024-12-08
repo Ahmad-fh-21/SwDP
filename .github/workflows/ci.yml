@@ -1,4 +1,4 @@
-name: Python Lint and Build
+name: Python Lint and Build remote images
 
 on: 
   pull_request:
@@ -20,13 +20,26 @@ jobs:
       - name: Run flake8 linter
         run: flake8 .  
 
-  image: 
+  docker_build_and_publish:
     needs: linting
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt  
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+      
+      - name: Set up Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Build and Push Images with Docker Compose
+        run: |
+          docker-compose -f ./Docker_workspace/docker-compose.yml build
+          docker-compose -f ./Docker_workspace/docker-compose.yml push
