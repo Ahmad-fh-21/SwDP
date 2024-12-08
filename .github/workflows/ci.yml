@@ -1,4 +1,4 @@
-name: Python Lint and Build
+name: Python Lint and Build remote images
 
 on: 
   pull_request:
