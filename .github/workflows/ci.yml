@@ -20,13 +20,30 @@ jobs:
       - name: Run flake8 linter
         run: flake8 .  
 
-  image: 
+  docker_build_and_publish:
     needs: linting
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt  
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      - name: Build and push BLE Docker image
+        run: |
+          docker build -f ./SwDP/Docker_workspace/ble/Dockerfile -t ahmadfhiot/ble:latest .
+          docker push ahmadfhiot/ble:latest
+
+      - name: Build and push Client Docker image
+        run: |
+          docker build -f ./SwDP/Docker_workspace/client/Dockerfile -t ahmadfhiot/client:latest .
+          docker push ahmadfhiot/client:latest
+
+      - name: Build and push Node-RED Docker image
+        run: |
+          docker build -f ./SwDP/Docker_workspace/nodered/Dockerfile -t ahmadfhiot/nodered:latest .
+          docker push ahmadfhiot/nodered:latest
