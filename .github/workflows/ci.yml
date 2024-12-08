@@ -32,19 +32,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
-      - name: Build and push Node-RED Docker image
+
+
+      - name: Build and Push Images with Docker Compose
         run: |
-          docker build -f ./Docker_workspace/nodered/Dockerfile -t ahmadfhiot/nodered:latest .
-          docker push ahmadfhiot/nodered:latest
-
-      - name: Build and push BLE Docker image
-        run: |
-          docker build -f ./Docker_workspace/ble/Dockerfile -t ahmadfhiot/ble:latest .
-          docker push ahmadfhiot/ble:latest
-      - name: Build and push Client Docker image
-        run: |
-          docker build -f ./Docker_workspace/client/Dockerfile -t ahmadfhiot/client:latest .
-          docker push ahmadfhiot/client:latest
-
-
-
+          docker-compose -f docker-compose.yml build
+          docker-compose -f docker-compose.yml push
