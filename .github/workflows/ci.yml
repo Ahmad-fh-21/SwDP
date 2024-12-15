@@ -46,7 +46,7 @@ jobs:
           sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
-
+  
       - name: Cache Docker layers
         uses: actions/cache@v3
         with:
@@ -55,20 +55,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
   
-      - name: Create Cache Directory
-        run: mkdir -p /tmp/.buildx-cache
-      
-      - name: Build and Push Images Using Buildx
+      - name: Build and Push Images with Docker Compose
         run: |
-          # Get the list of services from docker-compose.yml
-          services=$(docker-compose -f ./Docker_workspace/docker-compose.yml config --services)
-      
-          # Build and push images for each service using docker buildx
-          for service in $services; do
-            docker buildx build -f ./Docker_workspace/Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from=type=local,src=/tmp/.buildx-cache -t myuser/$service:latest --push .
-          done
-      # - name: Build and Push Images with Docker Compose
-      #   run: |
-      #     docker-compose -f ./Docker_workspace/docker-compose.yml build 
-      #     docker-compose -f ./Docker_workspace/docker-compose.yml push
+          docker-compose -f ./Docker_workspace/docker-compose.yml build 
+          docker-compose -f ./Docker_workspace/docker-compose.yml push
 
