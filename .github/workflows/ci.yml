@@ -7,6 +7,10 @@ on:
   push:
     branches: ["main"]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs: 
   linting: 
     runs-on: ubuntu-latest
@@ -39,7 +43,11 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
 
+      - name: Pull existing images for caching
+        run: |
+            docker-compose -f ./Docker_workspace/docker-compose.yml pull || echo "No cache available"
+
       - name: Build and Push Images with Docker Compose
         run: |
-          docker-compose -f ./Docker_workspace/docker-compose.yml build
+          docker-compose -f ./Docker_workspace/docker-compose.yml build --pull --cache-from
           docker-compose -f ./Docker_workspace/docker-compose.yml push
