@@ -57,6 +57,6 @@ jobs:
   
       - name: Build and Push Images with Docker Compose
         run: |
-          docker-compose -f ./Docker_workspace/docker-compose.yml build --no-cache
+          docker-compose -f ./Docker_workspace/docker-compose.yml build 
           docker-compose -f ./Docker_workspace/docker-compose.yml push
 
