@@ -50,14 +50,17 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v3
         with:
-          #path: /tmp/.buildx-cache
-          push: true
+          path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
   
       - name: Build and Push Images with Docker Compose
         run: |
-          docker-compose -f ./Docker_workspace/docker-compose.yml build 
+          docker-compose -f ./Docker_workspace/docker-compose.yml build \
+            --progress=plain \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --cache-to=type=local,dest=/tmp/.buildx-cache
           docker-compose -f ./Docker_workspace/docker-compose.yml push
+
 
