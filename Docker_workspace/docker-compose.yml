@@ -2,6 +2,7 @@ version: '3'
 services:
   ble:
     build: ble
+    image: yourdockerhubusername/ble:latest
     depends_on:
       - mosquitto
     restart: unless-stopped
@@ -28,6 +29,7 @@ services:
       - ./mosquitto/passwd:/mosquitto/config/passwd
   client:
     build: client
+    image: yourdockerhubusername/client:latest
     depends_on:
       - mosquitto
     volumes:
