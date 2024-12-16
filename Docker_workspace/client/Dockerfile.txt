@@ -1,8 +1,8 @@
 
-FROM debian:latest
-RUN apt-get update && apt-get install -y mosquitto-clients python3-paho-mqtt avahi-utils
-COPY docker-entrypoint.sh .
-RUN chmod a+x docker-entrypoint.sh
-CMD ./docker-entrypoint.sh
+FROM debian:latest                                                                                     #use latest debian image as the base for the container
+RUN apt-get update && apt-get install -y mosquitto-clients python3-paho-mqtt avahi-utils               #update package list and install required packages
+COPY docker-entrypoint.sh .                                                                            #copy the docker-entrpoint.sh script into the containers working directory
+RUN chmod a+x docker-entrypoint.sh                                                                     #make the entrypoint script executeable
+CMD ./docker-entrypoint.sh                                                                             #Define default command to run when the container starts
 
 
