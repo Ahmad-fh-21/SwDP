@@ -60,11 +60,11 @@ jobs:
           DOCKER_BUILDKIT: 1
           COMPOSE_DOCKER_CLI_BUILD: 1
         run: |
-          docker-compose -f ./Docker_workspace/docker-compose.yml build \
-            --build-arg BUILDKIT_INLINE_CACHE=1 \
+          docker buildx bake --file ./Docker_workspace/docker-compose.yml \
             --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max
-          docker-compose -f ./Docker_workspace/docker-compose.yml push
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --push
+
 
       # - name: Build and Push Images with Docker Compose
       #   run: |
