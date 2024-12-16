@@ -47,24 +47,13 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
   
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Build and Push Images with Docker Compose
+      - name: Enable BuildKit
         env:
           DOCKER_BUILDKIT: 1
           COMPOSE_DOCKER_CLI_BUILD: 1
         run: |
-          docker buildx bake --file ./Docker_workspace/docker-compose.yml \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
-            --push
-
+          docker-compose -f ./Docker_workspace/docker-compose.yml build
+          docker-compose -f ./Docker_workspace/docker-compose.yml push
 
       # - name: Build and Push Images with Docker Compose
       #   run: |
