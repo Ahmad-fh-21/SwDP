@@ -2,7 +2,6 @@ version: '3'
 services:
   ble:
     build: ble
-    image: ahmadfhiot/ble:latest
     depends_on:
       - mosquitto
     restart: unless-stopped
@@ -29,7 +28,6 @@ services:
       - ./mosquitto/passwd:/mosquitto/config/passwd
   client:
     build: client
-    image: ahmadfhiot/client:latest
     depends_on:
       - mosquitto
     volumes:
@@ -37,7 +35,7 @@ services:
       - /run/dbus:/run/dbus
       - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
   influxdb:
-    image: ahmadfhiot/influxdb:latest
+    image: influxdb:latest
     restart: unless-stopped
     ports:
       - '127.0.0.1:8086:8086'
@@ -63,7 +61,6 @@ services:
       args:
         - DOCKERHUB_TAG=latest-debian
     restart: unless-stopped
-    image: ahmadfhiot/nodered:latest
     environment:
       - TZ=Europe/Vienna
     ports:
@@ -73,7 +70,7 @@ services:
       - /run/dbus:/run/dbus
       - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
   grafana:
-    image: ahmadfhiot/grafana/grafana:latest
+    image: grafana/grafana:latest
     restart: unless-stopped
     ports:
       - '127.0.0.1:3000:3000'
